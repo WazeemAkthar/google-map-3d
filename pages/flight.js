@@ -44,8 +44,12 @@ function MyMap() {
 }
 
 function Directions({ setRoute }) {
-  const [origin] = useState("colombo, sri lanka");
-  const [destination] = useState("Terminal 2, Cessna Rd, Longford, Hounslow TW6 1AH, United Kingdom");
+  const [origin] = useState("Bandaranaike International Airport");
+  const [destination] = useState(
+    "Terminal 2, Cessna Rd, Longford, Hounslow TW6 1AH, United Kingdom"
+  );
+
+
 
   useEffect(() => {
     fetchDirections(origin, destination, setRoute);
@@ -68,7 +72,7 @@ const FRONT_VECTOR = new Vector3(0, -1, 0);
 function Animate({ route, map }) {
   const overlayRef = useRef();
   const trackRef = useRef();
-  const carRef = useRef();
+  const planeRef = useRef();
 
   useEffect(() => {
     map.setCenter(route[Math.floor(route.length / 2)], 17);
@@ -89,11 +93,11 @@ function Animate({ route, map }) {
     scene.add(trackRef.current);
 
     loadModel().then((model) => {
-      if (carRef.current) {
-        scene.remove(carRef.current);
+      if (planeRef.current) {
+        scene.remove(planeRef.current);
       }
-      carRef.current = model;
-      scene.add(carRef.current);
+      planeRef.current = model;
+      scene.add(planeRef.current);
     });
 
     overlayRef.current.update = () => {
@@ -101,14 +105,14 @@ function Animate({ route, map }) {
         overlayRef.current.getViewportSize()
       );
 
-      if (carRef.current) {
+      if (planeRef.current) {
         const progress = (performance.now() % ANIMATION_MS) / ANIMATION_MS;
-        curve.getPointAt(progress, carRef.current.position);
-        carRef.current.quaternion.setFromUnitVectors(
+        curve.getPointAt(progress, planeRef.current.position);
+        planeRef.current.quaternion.setFromUnitVectors(
           FRONT_VECTOR,
           curve.getTangentAt(progress)
         );
-        carRef.current.rotateX(Math.PI / 2);
+        planeRef.current.rotateX(Math.PI / 2);
       }
 
       overlayRef.current.requestRedraw();
@@ -116,7 +120,7 @@ function Animate({ route, map }) {
 
     return () => {
       scene.remove(trackRef.current);
-      scene.remove(carRef.current);
+      scene.remove(planeRef.current);
     };
   }, [map, route]);
 }
@@ -136,7 +140,6 @@ function createTrackFromCurve(curve) {
 
 async function loadModel() {
   const loader = new GLTFLoader();
-  // This work is based on "Low poly Car" (https://sketchfab.com/3d-models/low-poly-car-f822f0c500a24ca9ac2af183d2e630b4) by reyad.bader (https://sketchfab.com/reyad.bader) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
   const object = await loader.loadAsync("/Aircraft/scene.gltf");
   const group = object.scene;
   group.scale.setScalar(0.5);
